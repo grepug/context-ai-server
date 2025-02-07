@@ -3,7 +3,7 @@ import ContextSharedModels
 import Foundation
 import SwiftAI
 
-extension WordInfoCompletion: @retroactive AILLMCompletion {
+extension WordInfoCompletion: @retroactive AIStreamCompletion {
     public func promptTemplate() async throws -> String {
         PromptTemplates.wordInfo
     }

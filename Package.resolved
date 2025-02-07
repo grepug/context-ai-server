@@ -1,5 +1,5 @@
 {
-  "originHash" : "4efc59499b8162c6f7e132499ac2a640c3b222254601e38b841c34c7d7e554f0",
+  "originHash" : "11db7f38193e6b44b18c30a4b89e435711a6be95838760d7a505db0d8b8b7396",
   "pins" : [
     {
       "identity" : "context-shared-models",
@@ -20,12 +20,12 @@
       }
     },
     {
-      "identity" : "swift-ai",
+      "identity" : "swift-collections",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/grepug/swift-ai.git",
+      "location" : "https://github.com/apple/swift-collections.git",
       "state" : {
-        "branch" : "main",
-        "revision" : "f359a25739c6c6247cfa642b93536c64b0ad4cc0"
+        "revision" : "671108c96644956dddcd89dd59c203dcdb36cec7",
+        "version" : "1.1.4"
       }
     }
   ],

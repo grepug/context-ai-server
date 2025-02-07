@@ -2,7 +2,7 @@ import ContextAI
 import ContextSharedModels
 import SwiftAI
 
-extension SelectSenseCompletion: @retroactive AILLMCompletion {
+extension SelectSenseCompletion: @retroactive AIStreamCompletion {
     public func promptTemplate() async throws -> String {
         PromptTemplates.selectSense
     }

@@ -5,20 +5,28 @@ import PackageDescription
 
 let package = Package(
     name: "context-ai-server",
+    platforms: [.macOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
-            name: "context-ai-server",
-            targets: ["context-ai-server"]),
+            name: "ContextAIServer",
+            targets: ["ContextAIServer"])
+    ],
+    dependencies: [
+        .package(url: "https://github.com/grepug/context-ai.git", branch: "main")
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "context-ai-server"),
+            name: "ContextAIServer",
+            dependencies: [
+                .product(name: "ContextAI", package: "context-ai")
+            ]
+        ),
         .testTarget(
-            name: "context-ai-serverTests",
-            dependencies: ["context-ai-server"]
+            name: "ContextAIServerTests",
+            dependencies: ["ContextAIServer"]
         ),
     ]
 )

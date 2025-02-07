@@ -1,0 +1,33 @@
+{
+  "originHash" : "4efc59499b8162c6f7e132499ac2a640c3b222254601e38b841c34c7d7e554f0",
+  "pins" : [
+    {
+      "identity" : "context-shared-models",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/grepug/context-shared-models.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "07b2ed624310d8490b0b6b44d0e725985a892908"
+      }
+    },
+    {
+      "identity" : "event-source",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/grepug/event-source.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "9573201033c457f0786e4419fea8752bde0a52c1"
+      }
+    },
+    {
+      "identity" : "swift-ai",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/grepug/swift-ai.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "f359a25739c6c6247cfa642b93536c64b0ad4cc0"
+      }
+    }
+  ],
+  "version" : 3
+}

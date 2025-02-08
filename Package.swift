@@ -16,6 +16,7 @@ let package = Package(
         .package(url: "https://github.com/grepug/context-ai.git", branch: "main"),
         .package(url: "https://github.com/grepug/swift-ai.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-collections.git", .upToNextMinor(from: "1.1.0")),
+        .package(url: "https://github.com/apple/swift-async-algorithms", from: "1.0.0"),
     ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "ContextAI", package: "context-ai"),
                 .product(name: "SwiftAIServer", package: "swift-ai"),
                 .product(name: "Collections", package: "swift-collections"),
+                .product(name: "AsyncAlgorithms", package: "swift-async-algorithms"),
             ]
         ),
         .testTarget(

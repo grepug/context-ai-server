@@ -137,13 +137,17 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
 extension WordSuggestionsAndLookupWorkflow.Implementation {
     func fetchAISense(token: ContextModel.TokenItem) async throws -> LocaledStringDict {
         let completion = SelectSenseCompletion(input: .init(text: input.text, word: token.text, adja: token.adjacentText, sense: ""))
-        let output = try await client.generate(completion: completion)
+        let stream = await client.stream(completion: completion)
 
-        switch output {
-        case .aiSense(let dict):
-            return dict
-        case .index:
-            return [:]
+        for try await output in stream {
+            switch output {
+            case .aiSense(let dict):
+                return dict
+            case .index:
+                return [:]
+            }
         }
+
+        return [:]
     }
 }

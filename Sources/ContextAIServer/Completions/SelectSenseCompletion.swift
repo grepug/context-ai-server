@@ -26,7 +26,17 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
     }
 
     public func makeOutput(string: String) -> Output {
-        fatalError("Not implemented")
+        if let match = string.firstMatch(of: #/\^(.+?)\^/#) {
+            if let index = Int(match.output.1), index != 0 {
+                return .index(index)
+            }
+        }
+
+        if let match = string.firstMatch(of: #/\%(.+?)\%/#) {
+            return .aiSense(handleMultipleLocales(String(match.output.1)))
+        }
+
+        return .aiSense([:])
     }
 }
 

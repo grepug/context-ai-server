@@ -1,16 +1,8 @@
+import ContextAI
 import SwiftAI
 
-public enum TextCompletionKey: String, Hashable, Sendable {
-    case translator
-    case studyNotes
-    case thesaurus
-    case memorizingHelper
-    case collocations
-    case usages
-}
-
 extension TextCompletionKey {
-    var template: String {
+    public var template: String {
         switch self {
         case .collocations: PromptTemplates.collocations
         case .translator: PromptTemplates.translator

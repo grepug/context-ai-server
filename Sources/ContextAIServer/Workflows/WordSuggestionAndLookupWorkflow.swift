@@ -9,6 +9,8 @@ extension WordSuggestionsAndLookupWorkflow: @retroactive AIStreamWorkflow {
     public protocol ToolsKind: Sendable {
         func tokenizedAndFiltered(_ text: String) async throws -> [ContextModel.TokenItem]
         func wordFrequencies(_ tokens: [ContextModel.TokenItem]) async throws -> [UUID: Int]
+
+        func legacy_fetchEntry(token: ContextModel.TokenItem) async throws -> ContextModel.Entry?
     }
 
     public typealias Tools = ToolsKind
@@ -67,22 +69,34 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
             .prefix(3)
             .compactMap { id in tokens.first { $0.id == id } }
 
-        let items: [ContextModel.ContextSegment] = try await withThrowingTaskGroup(of: ContextModel.ContextSegment.self) { group in
+        let items: [ContextModel.ContextSegment] = try await withThrowingTaskGroup(of: ContextModel.ContextSegment?.self) { group in
             for token in finalTokens {
                 group.addTask {
-                    let sense = try await fetchAISense(token: token)
+                    let sense = try await fetchWordSense(token: token)
 
-                    return ContextModel.ContextSegment(
+                    var segment = ContextModel.ContextSegment(
                         id: token.id,
                         segment: .textRange(.init(array: token.range)),
-                        text: token.text,
-                        sense: sense
+                        text: token.text
                     )
+
+                    switch sense {
+                    case .entrySense(let entrySense):
+                        segment.entrySense = entrySense
+                    case .aiSense(let aiSense):
+                        segment.sense = aiSense
+                    case nil:
+                        return nil
+                    }
+
+                    return segment
                 }
             }
 
             return try await group.reduce(into: []) { partialResult, item in
-                partialResult.append(item)
+                if let item {
+                    partialResult.append(item)
+                }
             }
         }
 
@@ -99,6 +113,7 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
 
         let items: [UUID: ContextModel.ContextSegment] = phrases.reduce(into: [:]) { partialResult, item in
             guard let range = getRange(text: item.phrase, adjacentText: item.adja, wholeText: input.text) else {
+                print("Could not find range for \(item.phrase), adja: \(item.adja), wholeText: \(input.text)")
                 return
             }
 
@@ -135,19 +150,56 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
 }
 
 extension WordSuggestionsAndLookupWorkflow.Implementation {
-    func fetchAISense(token: ContextModel.TokenItem) async throws -> LocaledStringDict {
-        let completion = SelectSenseCompletion(input: .init(text: input.text, word: token.text, adja: token.adjacentText, sense: ""))
+    enum SenseOutput {
+        case entrySense(ContextModel.EntrySense)
+        case aiSense(LocaledStringDict)
+    }
+
+    func fetchAISense(token: ContextModel.TokenItem, senses: [ContextModel.EntrySense], promptSense: String) async throws -> SenseOutput? {
+        let input = SelectSenseCompletion.Input(
+            text: input.text,
+            word: token.text,
+            adja: token.adjacentText,
+            sense: promptSense
+        )
+        let completion = SelectSenseCompletion(input: input)
         let stream = await client.stream(completion: completion)
 
         for try await output in stream {
             switch output {
             case .aiSense(let dict):
-                return dict
-            case .index:
-                return [:]
+                return .aiSense(dict)
+            case .index(let index):
+                if senses.count >= index {
+                    return .entrySense(senses[index - 1])
+                }
             }
         }
 
-        return [:]
+        return nil
+    }
+}
+
+extension WordSuggestionsAndLookupWorkflow.Implementation {
+    private func fetchWordSense(token: ContextModel.TokenItem) async throws -> SenseOutput? {
+        let entry = try await tools.legacy_fetchEntry(token: token)
+
+        let senses =
+            entry?.senses.filter { sense in
+                sense.localizedTexts.contains(where: { $0.locale == .en })
+            } ?? []
+
+        let prompt = senses.indices.map { index in
+            let sense = senses[index]
+            return "^\(index + 1)^: \(sense.pos.rawValue), \(sense.localizedTexts.first(where: { $0.locale == .en })!.text)"
+        }.joined(separator: "\n")
+
+        let result = try await fetchAISense(token: token, senses: senses, promptSense: prompt)
+
+        if let result {
+            return result
+        }
+
+        return try await fetchAISense(token: token, senses: senses, promptSense: "")
     }
 }

@@ -82,7 +82,9 @@ extension FindPhrasesCompletion: @retroactive AILLMCompletion {
             return .init(phrase: phrase, lemma: lemma, adja: adja, sense: sense, desc: desc, syn: syn)
         }
 
-        assert(phrases.count == items.count, "expected \(items.count) phrases, got \(phrases.count)")
+        if phrases.count != items.count {
+            print("phrases count not equals", "expected \(items.count) phrases, got \(phrases.count)")
+        }
 
         return .init(phrases: phrases)
     }

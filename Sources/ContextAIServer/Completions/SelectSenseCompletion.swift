@@ -3,10 +3,6 @@ import ContextSharedModels
 import SwiftAI
 
 extension SelectSenseCompletion: @retroactive AIStreamCompletion {
-    public func promptTemplate() async throws -> String {
-        PromptTemplates.selectSense
-    }
-
     public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
         accumulatedString += chunk
 

@@ -4,10 +4,6 @@ import Foundation
 import SwiftAI
 
 extension WordInfoCompletion: @retroactive AIStreamCompletion {
-    public func promptTemplate() async throws -> String {
-        PromptTemplates.wordInfo
-    }
-
     public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
         accumulatedString += chunk
 

@@ -4,6 +4,14 @@ import Foundation
 import SwiftAI
 
 extension WordInfoCompletion: @retroactive AIStreamCompletion {
+    public func initialOutput() -> Output {
+        .init(synonym: "", desc: [:])
+    }
+
+    public func reduce(partialOutput: inout Output, chunk: Output) {
+        partialOutput = chunk
+    }
+
     public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
         accumulatedString += chunk
 

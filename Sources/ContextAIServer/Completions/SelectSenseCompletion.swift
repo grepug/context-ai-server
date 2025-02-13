@@ -3,6 +3,14 @@ import ContextSharedModels
 import SwiftAI
 
 extension SelectSenseCompletion: @retroactive AIStreamCompletion {
+    public func initialOutput() -> Output {
+        .index(0)
+    }
+
+    public func reduce(partialOutput: inout Output, chunk: Output) {
+        partialOutput = chunk
+    }
+
     public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
         accumulatedString += chunk
 

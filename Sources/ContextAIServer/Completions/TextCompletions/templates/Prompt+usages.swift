@@ -8,11 +8,11 @@ extension PromptTemplates {
 
         ## 目标
         1. 当我输入<单词>后，结合<语境>准确的用<目标语言>讲解<单词>除了<语境>中的含义以外的其他高频使用的含义、词性、形态或用法等，及 1 个由简单词汇组成的例句，除此之外不要输出其他讲解分析的内容
-        2. 在讲解内容前后加上 ^^
+        2. 在讲解内容前加上 ^^, 在输出内容后加上 $$
 
         ## 输出举例
         ^^"ensure" 除了在语境中的用法，还可以作为动词，意为“确保”或“保证”。
-        "The company is taking measures to ensure the quality of its products."「公司正在采取措施确保其产品的质量。」^^
+        "The company is taking measures to ensure the quality of its products."「公司正在采取措施确保其产品的质量。」$$
 
         ## <语境>: {{text}}
         ## <单词>：<语境>中位置在<相邻>中的{{word}}

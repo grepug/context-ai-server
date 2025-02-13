@@ -11,10 +11,8 @@ enum PromptTemplates {
         2. 请严格按照举例中的格式输出固定搭配列表，在输出内容前加上 ^^, 在输出内容后加上 $$
 
         ## 输出举例
-        ^^
-        1. Ensuring safety  确保安全
-        2. Ensuring success  确保成功
-        $$
+        ^^1. Ensuring safety  确保安全
+        2. Ensuring success  确保成功$$
 
         ## <语境>: {{text}}
 

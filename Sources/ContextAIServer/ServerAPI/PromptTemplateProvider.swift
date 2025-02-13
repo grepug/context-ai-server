@@ -10,13 +10,14 @@ public struct PromptTemplateProvider: AIPromptTemplateProvider {
             switch key {
             case .collocations: return PromptTemplates.collocations
             case .memorizingHelper: return PromptTemplates.memorizingHelper
-            case .studyNotes: return PromptTemplates.studyNotes
             case .thesaurus: return PromptTemplates.thesaurus
             case .usages: return PromptTemplates.usages
             }
         }
 
         switch key {
+        case StudyNotesTextCompletion.kind:
+            return PromptTemplates.studyNotes
         case TranslatorTextCompletion.kind:
             return PromptTemplates.translator
         case FindPhrasesCompletion.kind:

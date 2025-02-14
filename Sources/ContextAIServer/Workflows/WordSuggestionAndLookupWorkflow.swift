@@ -2,6 +2,7 @@ import Collections
 import ContextAI
 import ContextSharedModels
 import Foundation
+import Logging
 import SwiftAI
 import SwiftAIServer
 
@@ -13,10 +14,8 @@ extension WordSuggestionsAndLookupWorkflow: @retroactive AIStreamWorkflow {
         func legacy_fetchEntry(token: ContextModel.TokenItem) async throws -> ContextModel.Entry?
     }
 
-    public typealias Tools = ToolsKind
-
-    public func streamChunk(client: any AICompletionClientKind, tools: Tools) -> AsyncThrowingStream<StreamChunk, any Error> {
-        Implementation(input: input, client: client, tools: tools).streamChunk()
+    public func streamChunk(environment: AIWorkflowEnvironment, tools: ToolsKind) -> AsyncThrowingStream<StreamChunk, any Error> {
+        Implementation(input: input, environment: environment, tools: tools).streamChunk()
     }
 }
 
@@ -25,8 +24,12 @@ extension WordSuggestionsAndLookupWorkflow {
         typealias Chunk = WordSuggestionsAndLookupWorkflow.StreamChunk
 
         let input: WordSuggestionsAndLookupWorkflow.Input
-        let client: any AICompletionClientKind
+        let environment: AIWorkflowEnvironment
         let tools: WordSuggestionsAndLookupWorkflow.Tools
+
+        var logger: Logger {
+            environment.logger
+        }
 
         func streamChunk() -> AsyncThrowingStream<Chunk, any Error> {
             let (newStream, continuation) = AsyncThrowingStream<Chunk, any Error>.makeStream()
@@ -109,7 +112,7 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
 
     func getSuggestedPhrasesChunk() async throws -> Chunk {
         let completion = FindPhrasesCompletion(input: .init(text: input.text, langs: input.langs))
-        let phrases = try await client.generate(completion: completion).phrases
+        let phrases = try await environment.client.generate(completion: completion).phrases
 
         let items: [UUID: ContextModel.ContextSegment] = phrases.reduce(into: [:]) { partialResult, item in
             guard let range = getRange(text: item.phrase, adjacentText: item.adja, wholeText: input.text) else {
@@ -121,7 +124,10 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
                 id: .init(),
                 segment: .textRange(.init(array: range)),
                 text: item.phrase,
-                sense: item.sense
+                lemma: item.lemma,
+                synonym: item.syn,
+                sense: item.sense,
+                desc: handleMultipleLocales(item.desc)
             )
             partialResult[seg.id] = seg
         }
@@ -163,7 +169,7 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
             sense: promptSense
         )
         let completion = SelectSenseCompletion(input: input)
-        let stream = await client.stream(completion: completion)
+        let stream = await environment.client.stream(completion: completion)
 
         for try await output in stream {
             switch output {

@@ -10,8 +10,8 @@ extension WordLookupWorkflow: @retroactive AIStreamWorkflow {
         func legacy_fetchEntry(token: ContextModel.TokenItem) async throws -> ContextModel.Entry?
     }
 
-    public func streamChunk(client: any AICompletionClientKind, tools: ToolsKind) -> AsyncThrowingStream<Output, any Error> {
-        Implementation(input: input, client: client, tools: tools).streamChunk()
+    public func streamChunk(environment: AIWorkflowEnvironment, tools: ()) -> AsyncThrowingStream<ContextModel.ContextSegment, any Error> {
+        Implementation(input: input, client: environment.client, tools: tools).streamChunk()
     }
 }
 

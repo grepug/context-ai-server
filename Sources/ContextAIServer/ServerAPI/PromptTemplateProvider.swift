@@ -62,12 +62,12 @@ public struct PromptTemplateProvider: AIPromptTemplateProvider {
 
                 ## 示例：
                 <语境>: The new manager took over the project last week and has been looking forward to implementing innovative ideas. Though he picked up some resistance initially, he managed to break the ice by making friends with key team members.
-                <目标语言>: zh-CN||en-US
+                <目标语言>: zh-Hans, en
 
                 **输出：**
-                %^looking forward to#;;;look forward to#;;;期待；盼望||To feel excited about something that will happen#;;;anticipate with pleasure#;;;表达对未来计划实施的期待||Expresses anticipation for future implementation plans^^
-                %^break the ice#;;;break the ice#;;;打破僵局；破冰||To do something to make people feel more comfortable#;;;ease tension#;;;描述通过建立关系缓解紧张氛围||Description: Describes relieving tension by building relationships^^
-                %^making friends#;;;make friends#;;;交朋友；建立友谊||To form new friendships#;;;build relationships#;;;描述指与核心成员建立友好关系||Refers to establishing friendly relationships with core members^^
+                %^looking forward to#;;;look forward to#;;;zh-Hans: 期待；盼望||en: To feel excited about something that will happen#;;;anticipate with pleasure#;;;zh-Hans: 表达对未来计划实施的期待||en: Expresses anticipation for future implementation plans^^
+                %^break the ice#;;;break the ice#;;;zh-Hans: 打破僵局；破冰||en: To do something to make people feel more comfortable#;;;ease tension#;;;zh-Hans: 描述通过建立关系缓解紧张氛围||en: Describes relieving tension by building relationships^^
+                %^making friends#;;;make friends#;;;zh-Hans: 交朋友；建立友谊||en: To form new friendships#;;;build relationships#;;;zh-Hans: 描述指与核心成员建立友好关系||en: Refers to establishing friendly relationships with core members^^
 
                 ## <语境>: {{text}}
                 ## <目标语言>: {{langs}}

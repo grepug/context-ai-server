@@ -36,13 +36,23 @@ extension WordSuggestionsAndLookupWorkflow {
 
             Task {
                 do {
-                    async let phrasesChunk = try await getSuggestedPhrasesChunk()
-                    async let wordsChunk = try await getSuggestedWordsChunk()
+                    let task1 = Task {
+                        let chunk = try await getSuggestedPhrasesChunk()
+                        continuation.yield(chunk)
+                    }
 
-                    let chunks = try await [phrasesChunk, wordsChunk]
+                    // let task2 = Task {
+                    //     let chunk = try await getSuggestedWordsChunk()
+                    //     continuation.yield(chunk)
+                    // }
 
-                    continuation.yield(chunks[0])
-                    continuation.yield(chunks[1])
+                    async let t1: () = task1.value
+                    // async let t2: () = task2.value
+
+                    _ = try await [
+                        t1
+                        // t2
+                    ]
 
                     continuation.finish()
                 } catch {
@@ -129,6 +139,23 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
                 sense: item.sense,
                 desc: handleMultipleLocales(item.desc)
             )
+
+            environment.logger.info(
+                "phrase item",
+                metadata: [
+                    "text": "\(item.phrase) (\(item.lemma))",
+                    "range": "\(range)",
+                    "sense": "\(item.sense)",
+                    "lemma": "\(item.lemma)",
+                    "syn": "\(item.syn)",
+                    "desc": "\(handleMultipleLocales(item.desc))",
+                ])
+
+            assert(handleMultipleLocales(item.desc).isEmpty == false)
+            assert(item.sense.isEmpty == false)
+            assert(item.lemma.isEmpty == false)
+            assert(item.syn.isEmpty == false)
+
             partialResult[seg.id] = seg
         }
 

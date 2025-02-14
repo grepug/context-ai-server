@@ -52,10 +52,20 @@ func handleMultipleLocales(_ str: String) -> LocaledStringDict {
             return
         }
 
-        let locale = CTLocale(String(match.output.1))
+        let localeString = String(match.output.1)
+        let locale = CTLocale(localeString)
         let content = String(match.output.2)
+        var finalLocale = locale
 
-        if let locale {
+        if finalLocale == nil {
+            if localeString == "简体中文" {
+                finalLocale = .zh_Hans
+            } else if localeString == "英语" {
+                finalLocale = .en
+            }
+        }
+
+        if let locale = finalLocale {
             acc[locale] = content
         }
     }

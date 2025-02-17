@@ -37,8 +37,19 @@ extension WordSuggestionsAndLookupWorkflow {
             Task {
                 do {
                     let task1 = Task {
-                        let chunk = try await getSuggestedPhrasesChunk()
-                        continuation.yield(chunk)
+                        do {
+                            let chunk = try await getSuggestedPhrasesChunk()
+                            continuation.yield(chunk)
+                        } catch {
+                            logger.error(
+                                "get suggested phrases chunk failed",
+                                metadata: [
+                                    "error": "\(error.localizedDescription)"
+                                ]
+                            )
+
+                            throw error
+                        }
                     }
 
                     // let task2 = Task {
@@ -196,7 +207,7 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
             sense: promptSense
         )
         let completion = SelectSenseCompletion(input: input)
-        let stream = await environment.client.stream(completion: completion)
+        let stream = try await environment.client.stream(completion: completion)
 
         for try await output in stream {
             switch output {

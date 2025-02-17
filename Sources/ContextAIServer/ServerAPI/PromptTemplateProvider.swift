@@ -3,9 +3,7 @@ import SwiftAI
 import SwiftAIServer
 
 public struct PromptTemplateProvider: AIPromptTemplateProvider {
-    public init() {}
-
-    public func promptTemplate(forKey key: String) async throws -> String {
+    public func promptTemplate(forKey key: String) async throws(AIPromptTemplateProviderError) -> String {
         if let key = ExtraInfoTextCompletion.Key(rawValue: key) {
             switch key {
             case .collocations: return PromptTemplates.collocations
@@ -77,7 +75,9 @@ public struct PromptTemplateProvider: AIPromptTemplateProvider {
         case WordInfoCompletion.kind:
             return PromptTemplates.wordInfo
         default:
-            fatalError()
+            throw .promptTemplateNotFound(key: key)
         }
     }
+
+    public init() {}
 }

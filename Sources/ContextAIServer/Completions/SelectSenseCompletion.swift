@@ -17,8 +17,8 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
         if let match = accumulatedString.firstMatch(of: #/\^(.+?)\^/#) {
             let index = Int(match.output.1)
 
-            if index != 0 {
-                return (index.map { .index($0) }, true)
+            if let index, index != 0 {
+                return (.index(index), true)
             }
         }
 

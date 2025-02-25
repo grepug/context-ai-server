@@ -32,10 +32,10 @@ extension WordInfoCompletion: @retroactive AIStreamCompletion {
         let synonym = items[0]
         let descString = items[1]
 
-        if !descString.isEmpty && accumulatedString.contains("^^") {
+        if !descString.isEmpty {
             let desc = handleMultipleLocales(descString)
 
-            return (Output(synonym: synonym, desc: desc), true)
+            return (Output(synonym: synonym, desc: desc), false)
         }
 
         return (nil, false)
@@ -43,5 +43,9 @@ extension WordInfoCompletion: @retroactive AIStreamCompletion {
 
     public func makeOutput(string: String) -> Output {
         fatalError()
+    }
+
+    public var endSymbol: String? {
+        "^^"
     }
 }

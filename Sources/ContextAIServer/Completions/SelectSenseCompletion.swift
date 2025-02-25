@@ -26,6 +26,12 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
             return (.aiSense(handleMultipleLocales(String(match.output.1))), true)
         }
 
+        if let numberOutput = accumulatedString.firstMatch(of: #/\d+/#)?.output {
+            if let index = Int(numberOutput) {
+                return (.index(index), true)
+            }
+        }
+
         return (nil, false)
     }
 

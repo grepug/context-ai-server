@@ -28,7 +28,7 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
 
         if let numberOutput = accumulatedString.firstMatch(of: #/\d+/#)?.output {
             if let index = Int(numberOutput) {
-                return (.index(index), true)
+                return (.index(index), false)
             }
         }
 

@@ -16,6 +16,8 @@ extension FindPhrasesCompletion: @retroactive AIStreamCompletion {
         if let match = cache.firstMatch(of: #/%\^(.+?)\^\^(.*?)$/#) {
             let string = String(match.output.1)
             let output = _makeOutput(string: string)
+
+            // reset cache
             cache = String(match.output.2)
 
             assert(output.phrases.count == 1)

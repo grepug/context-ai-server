@@ -12,12 +12,12 @@ extension WordInfoCompletion: @retroactive AIStreamCompletion {
         partialOutput = chunk
     }
 
-    public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
-        accumulatedString += chunk
+    public func makeOutput(chunk: String, cache: inout String) -> (output: Output?, shouldStop: Bool) {
+        cache += chunk
 
         let reg = #/(.*?)(\^\^|$)/#
 
-        guard let match = accumulatedString.firstMatch(of: reg) else {
+        guard let match = cache.firstMatch(of: reg) else {
             return (nil, false)
         }
 

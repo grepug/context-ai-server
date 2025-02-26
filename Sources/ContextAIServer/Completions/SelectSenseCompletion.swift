@@ -11,10 +11,10 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
         partialOutput = chunk
     }
 
-    public func makeOutput(chunk: String, accumulatedString: inout String) -> (output: Output?, shouldStop: Bool) {
-        accumulatedString += chunk
+    public func makeOutput(chunk: String, cache: inout String) -> (output: Output?, shouldStop: Bool) {
+        cache += chunk
 
-        if let match = accumulatedString.firstMatch(of: #/\^(.+?)\^/#) {
+        if let match = cache.firstMatch(of: #/\^(.+?)\^/#) {
             let index = Int(match.output.1)
 
             if let index, index > 0 {
@@ -22,11 +22,11 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
             }
         }
 
-        if let match = accumulatedString.firstMatch(of: #/\%(.+?)\%/#) {
+        if let match = cache.firstMatch(of: #/\%(.+?)\%/#) {
             return (.aiSense(handleMultipleLocales(String(match.output.1))), true)
         }
 
-        if let numberOutput = accumulatedString.firstMatch(of: #/\d+/#)?.output {
+        if let numberOutput = cache.firstMatch(of: #/\d+/#)?.output {
             if let index = Int(numberOutput), index > 0 {
                 return (.index(index), true)
             }

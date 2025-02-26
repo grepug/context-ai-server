@@ -1,9 +1,15 @@
 import ContextAI
 import SwiftAI
 
-extension FindPhrasesCompletion: @retroactive AILLMCompletion {
+extension FindPhrasesCompletion: @retroactive AIStreamCompletion {
     public var preferredModel: (any AIModel)? {
         SiliconFlow(apiKey: "", name: .custom("String"))
+    }
+
+    public func makeOutput(chunk: String, cache: inout String) -> (output: Output?, shouldStop: Bool) {
+        cache += chunk
+
+        return (makeOutput(string: cache), false)
     }
 
     public func makeOutput(string: String) -> Output {

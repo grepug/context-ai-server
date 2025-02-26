@@ -7,7 +7,7 @@
       "location" : "https://github.com/grepug/context-ai.git",
       "state" : {
         "branch" : "main",
-        "revision" : "32ef92e1c8a2d17d1e7a4765c595a28ee918be85"
+        "revision" : "73e43022ae12f766b922b4524960fb08bc5bfb81"
       }
     },
     {
@@ -34,7 +34,7 @@
       "location" : "https://github.com/grepug/swift-ai.git",
       "state" : {
         "branch" : "main",
-        "revision" : "6c1a8c5af1c4d57650fd6c0a7ea5816cacc9b40e"
+        "revision" : "454b7e1446c33761876fc9ba0052bebcc0467b0b"
       }
     },
     {

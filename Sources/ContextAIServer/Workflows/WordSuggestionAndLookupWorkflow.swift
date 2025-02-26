@@ -22,6 +22,7 @@ extension WordSuggestionsAndLookupWorkflow: @retroactive AIStreamWorkflow {
 extension WordSuggestionsAndLookupWorkflow {
     struct Implementation {
         typealias Chunk = WordSuggestionsAndLookupWorkflow.StreamChunk
+        typealias Stream = AsyncThrowingStream<Chunk, any Error>
 
         let input: WordSuggestionsAndLookupWorkflow.Input
         let environment: AIWorkflowEnvironment
@@ -31,15 +32,14 @@ extension WordSuggestionsAndLookupWorkflow {
             environment.logger
         }
 
-        func streamChunk() -> AsyncThrowingStream<Chunk, any Error> {
-            let (newStream, continuation) = AsyncThrowingStream<Chunk, any Error>.makeStream()
+        func streamChunk() -> Stream {
+            let (newStream, continuation) = Stream.makeStream()
 
             Task {
                 do {
                     let task1 = Task {
                         do {
-                            let chunk = try await getSuggestedPhrasesChunk()
-                            continuation.yield(chunk)
+                            try await streamSuggestedPhrasesChunk(continuation: continuation)
                         } catch {
                             logger.error(
                                 "get suggested phrases chunk failed",
@@ -131,46 +131,64 @@ extension WordSuggestionsAndLookupWorkflow.Implementation {
         return .init(suggestedItems: suggestedItems)
     }
 
-    func getSuggestedPhrasesChunk() async throws -> Chunk {
-        let completion = FindPhrasesCompletion(input: .init(text: input.text, langs: input.langs))
-        let phrases = try await environment.client.generate(completion: completion).phrases
+    struct StreamPhrasesChunkCache {
+        var rangeAndIdMap: [[Int]: UUID] = [:]
 
-        let items: [UUID: ContextModel.ContextSegment] = phrases.reduce(into: [:]) { partialResult, item in
-            guard let range = getRange(text: item.phrase, adjacentText: item.adja, wholeText: input.text) else {
-                print("Could not find range for \(item.phrase), adja: \(item.adja), wholeText: \(input.text)")
-                return
+        mutating func getOrCreateId(range: [Int]) -> UUID {
+            if let id = rangeAndIdMap[range] {
+                return id
             }
 
-            let seg = ContextModel.ContextSegment(
-                id: .init(),
-                segment: .textRange(.init(array: range)),
-                text: item.phrase,
-                lemma: item.lemma,
-                synonym: item.syn,
-                sense: item.sense,
-                desc: handleMultipleLocales(item.desc)
-            )
+            let id = UUID()
+            rangeAndIdMap[range] = id
 
-            environment.logger.info(
-                "phrase item",
-                metadata: [
-                    "text": "\(item.phrase) (\(item.lemma))",
-                    "range": "\(range)",
-                    "sense": "\(item.sense)",
-                    "lemma": "\(item.lemma)",
-                    "syn": "\(item.syn)",
-                    "desc": "\(handleMultipleLocales(item.desc))",
-                ])
-
-            assert(handleMultipleLocales(item.desc).isEmpty == false)
-            assert(item.sense.isEmpty == false)
-            assert(item.lemma.isEmpty == false)
-            assert(item.syn.isEmpty == false)
-
-            partialResult[seg.id] = seg
+            return id
         }
+    }
 
-        return Chunk(suggestedItems: items)
+    func streamSuggestedPhrasesChunk(continuation: Stream.Continuation) async throws {
+        let completion = FindPhrasesCompletion(input: .init(text: input.text, langs: input.langs))
+        let stream = try await environment.client.stream(completion: completion)
+        var cache = StreamPhrasesChunkCache()
+
+        for try await output in stream {
+            let items: [UUID: ContextModel.ContextSegment] = output.phrases.reduce(into: [:]) { partialResult, item in
+                guard let range = getRange(text: item.phrase, adjacentText: item.adja, wholeText: input.text) else {
+                    print("Could not find range for \(item.phrase), adja: \(item.adja), wholeText: \(input.text)")
+                    return
+                }
+
+                let seg = ContextModel.ContextSegment(
+                    id: cache.getOrCreateId(range: range),
+                    segment: .textRange(.init(array: range)),
+                    text: item.phrase,
+                    lemma: item.lemma,
+                    synonym: item.syn,
+                    sense: item.sense,
+                    desc: handleMultipleLocales(item.desc)
+                )
+
+                environment.logger.info(
+                    "phrase item",
+                    metadata: [
+                        "text": "\(item.phrase) (\(item.lemma))",
+                        "range": "\(range)",
+                        "sense": "\(item.sense)",
+                        "lemma": "\(item.lemma)",
+                        "syn": "\(item.syn)",
+                        "desc": "\(handleMultipleLocales(item.desc))",
+                    ])
+
+                assert(handleMultipleLocales(item.desc).isEmpty == false)
+                assert(item.sense.isEmpty == false)
+                assert(item.lemma.isEmpty == false)
+                assert(item.syn.isEmpty == false)
+
+                partialResult[seg.id] = seg
+            }
+
+            continuation.yield(Chunk(suggestedItems: items))
+        }
     }
 
     private func getRange(text: String, adjacentText: String, wholeText: String) -> [Int]? {

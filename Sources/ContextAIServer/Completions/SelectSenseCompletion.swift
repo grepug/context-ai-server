@@ -17,7 +17,7 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
         if let match = accumulatedString.firstMatch(of: #/\^(.+?)\^/#) {
             let index = Int(match.output.1)
 
-            if let index, index != 0 {
+            if let index, index > 0 {
                 return (.index(index), true)
             }
         }
@@ -27,8 +27,8 @@ extension SelectSenseCompletion: @retroactive AIStreamCompletion {
         }
 
         if let numberOutput = accumulatedString.firstMatch(of: #/\d+/#)?.output {
-            if let index = Int(numberOutput) {
-                return (.index(index), false)
+            if let index = Int(numberOutput), index > 0 {
+                return (.index(index), true)
             }
         }
 

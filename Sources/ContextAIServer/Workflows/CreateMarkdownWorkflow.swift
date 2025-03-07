@@ -6,12 +6,19 @@ import SwiftAI
 import SwiftAIServer
 
 extension CreateMarkdownWorkflow: @retroactive AIStreamWorkflow {
-    public func streamChunk(environment: AIWorkflowEnvironment, tools: ()) -> AsyncThrowingStream<StreamChunk, any Error> {
-        let completion = ConvertTextToMarkdownCompletion(input: .init(text: input.text))
+    public protocol ToolsKind: Sendable {
+        func makeMarkdown(text: String) async throws -> String
+    }
+
+    public typealias Tools = ToolsKind
+
+    public func streamChunk(environment: AIWorkflowEnvironment, tools: Tools) -> AsyncThrowingStream<StreamChunk, any Error> {
         let (newStream, continuation) = AsyncThrowingStream<StreamChunk, any Error>.makeStream()
 
         Task {
             do {
+                let markdown = try await tools.makeMarkdown(text: input.text)
+                let completion = ConvertTextToMarkdownCompletion(input: .init(text: markdown))
                 let stream = try await environment.client.stream(completion: completion)
 
                 for try await chunk in stream {

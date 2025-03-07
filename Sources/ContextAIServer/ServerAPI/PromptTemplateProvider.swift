@@ -85,6 +85,8 @@ public struct PromptTemplateProvider: AIPromptTemplateProvider {
             return PromptTemplates.selectSense
         case WordInfoCompletion.kind:
             return PromptTemplates.wordInfo
+        case CreateMarkdownWorkflow.kind:
+            return PromptTemplates.createMarkdown
         default:
             return nil
         }
